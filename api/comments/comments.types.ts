@@ -38,6 +38,6 @@ export interface PostCommentsProps {
 
 export interface PutCommentsProps {
   commentId: number;
-  token: string;
   content: string;
+  token: string;
 }

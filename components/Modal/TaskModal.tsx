@@ -36,16 +36,43 @@ const TaskModal: React.FC = () => {
     setIsModalOpen(false);
   };
 
+  const loadCardData = async () => {
+    const data = await getCard({
+      cardId: 159,
+      token: TMP_TOKEN,
+    });
+    if (data) {
+      setCardData(data);
+    }
+  };
+
+  const loadCommentsData = async () => {
+    try {
+      const commentsData = await getComments({
+        cardId: 159,
+        size: 10,
+        cursorId: undefined,
+        token: TMP_TOKEN,
+      });
+
+      if (commentsData) {
+        setCommentsData(commentsData.comments);
+      }
+    } catch (error) {
+      console.error("Error loading comments:", error);
+    }
+  };
+
   const submitComment = async (comment: string) => {
     await postComments({
-      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjA5LCJ0ZWFtSWQiOiIxLTA4IiwiaWF0IjoxNzAzNzI2OTIzLCJpc3MiOiJzcC10YXNraWZ5In0.YC0RG8_8Xoe8uEjPtqFEdCGilAlOonBG5x47GGJiOLc",
+      token: TMP_TOKEN,
       content: comment,
       cardId: 159,
       columnId: 1242,
       dashboardId: 394,
     });
 
-    await commentsData;
+    await loadCommentsData;
   };
 
   const handleEditClick = (commentId: number, currentContent: string) => {
@@ -56,7 +83,7 @@ const TaskModal: React.FC = () => {
 
   const handleDeleteClick = async (commentId: number) => {
     await deleteComments({ commentId, token: TMP_TOKEN });
-    await commentsData;
+    await loadCommentsData();
   };
 
   const handleKeyDown = async (event: React.KeyboardEvent, commentId: number) => {
@@ -64,6 +91,7 @@ const TaskModal: React.FC = () => {
       event.preventDefault();
       await handleUpdateComment(commentId);
     }
+    await loadCommentsData();
   };
 
   const handleUpdateComment = async (commentId: number) => {
@@ -76,38 +104,12 @@ const TaskModal: React.FC = () => {
       setIsEditing(false);
       setEditingCommentId(null);
       setNewCommentContent("");
-      await commentsData;
+
+      await loadCommentsData();
     }
   };
 
   useEffect(() => {
-    const loadCardData = async () => {
-      const data = await getCard({
-        cardId: "159",
-        token: TMP_TOKEN,
-      });
-      if (data) {
-        setCardData(data);
-      }
-    };
-
-    const loadCommentsData = async () => {
-      try {
-        const commentsData = await getComments({
-          cardId: 159,
-          size: 10,
-          cursorId: undefined,
-          token: TMP_TOKEN,
-        });
-
-        if (commentsData) {
-          setCommentsData(commentsData.comments);
-        }
-      } catch (error) {
-        console.error("Error loading comments:", error);
-      }
-    };
-
     loadCardData();
     loadCommentsData();
   }, []);
@@ -451,7 +453,7 @@ const FunctionWrapper = styled.div`
   gap: 1.2rem;
 `;
 
-const Edit = styled.div`
+const Edit = styled.button`
   color: var(--Gray9f);
   font-size: 1.2rem;
   text-decoration-line: underline;
@@ -461,7 +463,7 @@ const Edit = styled.div`
   }
 `;
 
-const Delete = styled.div`
+const Delete = styled.button`
   color: var(--Gray9f);
   font-size: 1.2rem;
   text-decoration-line: underline;
