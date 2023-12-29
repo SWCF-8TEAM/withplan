@@ -233,12 +233,6 @@ const TitleWrapper = styled.div`
 
   display: flex;
   justify-content: space-between;
-
-  /* position: fixed;
-  padding-top: 3.2rem;
-  padding-bottom: 2.4rem; */
-
-  background-color: var(--White);
 `;
 
 const Title = styled.div`
