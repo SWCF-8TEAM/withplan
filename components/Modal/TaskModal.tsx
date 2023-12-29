@@ -170,34 +170,32 @@ const TaskModal: React.FC = () => {
       </CategoryWrapper>
       <Description>{cardData.description}</Description>
       <Image src={cardData.imageUrl} alt="Task Image" />
-      <CommentContainer>
-        <ModalInput label="댓글" $inputType="댓글" onSubmitComment={submitComment} />
-        <CommentWrapper>
-          {commentsData.map((comment) => (
-            <CommentItem key={comment.id}>
-              <LeftWrapper>
-                <img src={comment.author.profileImageUrl} alt="nickname" />
-              </LeftWrapper>
-              <RightWrapper>
-                <InfoWrapper>
-                  {comment.author.nickname}
-                  <CommentDate>{formatUpdatedAt(comment.updatedAt)}</CommentDate>
-                </InfoWrapper>
-                {isEditing && editingCommentId === comment.id ? (
-                  <input type="text" value={newCommentContent} onChange={(e) => setNewCommentContent(e.target.value)} onKeyDown={(e) => handleKeyDown(e, comment.id)} />
-                ) : (
-                  <CommentContent>{comment.content}</CommentContent>
-                )}
-                <FunctionWrapper>
-                  <Edit onClick={() => handleEditClick(comment.id, comment.content)}>수정</Edit>
-                  <Delete onClick={() => handleDeleteClick(comment.id)}>삭제</Delete>
-                </FunctionWrapper>
-              </RightWrapper>
-            </CommentItem>
-          ))}
-          <div ref={targetRef}></div>
-        </CommentWrapper>
-      </CommentContainer>
+      <ModalInput label="댓글" $inputType="댓글" onSubmitComment={submitComment} />
+      <CommentWrapper>
+        {commentsData.map((comment) => (
+          <CommentItem key={comment.id}>
+            <LeftWrapper>
+              <img src={comment.author.profileImageUrl} alt="nickname" />
+            </LeftWrapper>
+            <RightWrapper>
+              <InfoWrapper>
+                {comment.author.nickname}
+                <CommentDate>{formatUpdatedAt(comment.updatedAt)}</CommentDate>
+              </InfoWrapper>
+              {isEditing && editingCommentId === comment.id ? (
+                <input type="text" value={newCommentContent} onChange={(e) => setNewCommentContent(e.target.value)} onKeyDown={(e) => handleKeyDown(e, comment.id)} />
+              ) : (
+                <CommentContent>{comment.content}</CommentContent>
+              )}
+              <FunctionWrapper>
+                <Edit onClick={() => handleEditClick(comment.id, comment.content)}>수정</Edit>
+                <Delete onClick={() => handleDeleteClick(comment.id)}>삭제</Delete>
+              </FunctionWrapper>
+            </RightWrapper>
+          </CommentItem>
+        ))}
+        <div ref={targetRef}></div>
+      </CommentWrapper>
     </Wrapper>
   );
 };
@@ -407,13 +405,6 @@ const Image = styled.img`
   @media (max-width: ${DeviceSize.mobile}) {
     margin-bottom: 1.9rem;
   }
-`;
-
-const CommentContainer = styled.div`
-  position: sticky;
-  top: 8.5rem;
-  z-index: 10;
-  background: var(--White);
 `;
 
 const CommentWrapper = styled.div`
