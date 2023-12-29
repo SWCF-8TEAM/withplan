@@ -1,7 +1,7 @@
 import { Card } from "@/api/cards/cards.types";
 import { getCard } from "@/api/cards/index";
 import { Comment } from "@/api/comments/comments.types";
-import { deleteComments, getComments, putComments, postComments } from "@/api/comments/index";
+import { deleteComments, getComments, postComments, putComments } from "@/api/comments/index";
 import Division from "@/assets/icons/category-division.svg";
 import Close from "@/assets/icons/close.svg";
 import Kebab from "@/assets/icons/kebab.svg";
@@ -9,6 +9,7 @@ import KebabModal from "@/components/Modal/KebabModal";
 import ModalInput from "@/components/Modal/ModalInput/ModalInput";
 import ColumnName from "@/components/common/Chip/ColumnName";
 import Tag from "@/components/common/Chip/Tag";
+import { useScroll } from "@/hooks/useScroll";
 import { DeviceSize } from "@/styles/DeviceSize";
 import { Z_INDEX } from "@/styles/ZindexStyles";
 import { formatUpdatedAt } from "@/utils/FormatDate";
@@ -20,6 +21,7 @@ const TMP_TOKEN =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjA5LCJ0ZWFtSWQiOiIxLTA4IiwiaWF0IjoxNzAzNzI2OTIzLCJpc3MiOiJzcC10YXNraWZ5In0.YC0RG8_8Xoe8uEjPtqFEdCGilAlOonBG5x47GGJiOLc";
 
 const TaskModal: React.FC = () => {
+  const { observe, unobserve, targetRef, loadData } = useScroll();
   const [isKebabModalOpen, setIsKebabModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [cardData, setCardData] = useState<Card | null>(null);
@@ -27,6 +29,7 @@ const TaskModal: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [newCommentContent, setNewCommentContent] = useState("");
+  const [cursorId, setCursorId] = useState<number | null>(null);
 
   const handleKebabClick = () => {
     setIsKebabModalOpen(!isKebabModalOpen);
@@ -47,20 +50,28 @@ const TaskModal: React.FC = () => {
   };
 
   const loadCommentsData = async () => {
+    if (commentsData.length > 0 && cursorId === null) {
+      unobserve();
+      return;
+    }
     try {
       const commentsData = await getComments({
         cardId: 159,
-        size: 10,
-        cursorId: undefined,
+        size: 2,
+        cursorId,
         token: TMP_TOKEN,
       });
 
       if (commentsData) {
-        setCommentsData(commentsData.comments);
+        setCommentsData((prev) => {
+          return [...prev, ...commentsData.comments];
+        });
+        setCursorId(commentsData.cursorId);
       }
     } catch (error) {
       console.error("Error loading comments:", error);
     }
+    observe();
   };
 
   const submitComment = async (comment: string) => {
@@ -72,7 +83,7 @@ const TaskModal: React.FC = () => {
       dashboardId: 394,
     });
 
-    await loadCommentsData;
+    await loadCommentsData();
   };
 
   const handleEditClick = (commentId: number, currentContent: string) => {
@@ -111,8 +122,11 @@ const TaskModal: React.FC = () => {
 
   useEffect(() => {
     loadCardData();
-    loadCommentsData();
   }, []);
+
+  useEffect(() => {
+    loadCommentsData();
+  }, [loadData]);
 
   if (!cardData) {
     return <div>Loading...</div>;
@@ -156,31 +170,34 @@ const TaskModal: React.FC = () => {
       </CategoryWrapper>
       <Description>{cardData.description}</Description>
       <Image src={cardData.imageUrl} alt="Task Image" />
-      <ModalInput label="댓글" $inputType="댓글" onSubmitComment={submitComment} />
-      <CommentWrapper>
-        {commentsData.map((comment) => (
-          <CommentItem key={comment.id}>
-            <LeftWrapper>
-              <img src={comment.author.profileImageUrl} alt="nickname" />
-            </LeftWrapper>
-            <RightWrapper>
-              <InfoWrapper>
-                {comment.author.nickname}
-                <CommentDate>{formatUpdatedAt(comment.updatedAt)}</CommentDate>
-              </InfoWrapper>
-              {isEditing && editingCommentId === comment.id ? (
-                <input type="text" value={newCommentContent} onChange={(e) => setNewCommentContent(e.target.value)} onKeyDown={(e) => handleKeyDown(e, comment.id)} />
-              ) : (
-                <CommentContent>{comment.content}</CommentContent>
-              )}
-              <FunctionWrapper>
-                <Edit onClick={() => handleEditClick(comment.id, comment.content)}>수정</Edit>
-                <Delete onClick={() => handleDeleteClick(comment.id)}>삭제</Delete>
-              </FunctionWrapper>
-            </RightWrapper>
-          </CommentItem>
-        ))}
-      </CommentWrapper>
+      <CommentContainer>
+        <ModalInput label="댓글" $inputType="댓글" onSubmitComment={submitComment} />
+        <CommentWrapper>
+          {commentsData.map((comment) => (
+            <CommentItem key={comment.id}>
+              <LeftWrapper>
+                <img src={comment.author.profileImageUrl} alt="nickname" />
+              </LeftWrapper>
+              <RightWrapper>
+                <InfoWrapper>
+                  {comment.author.nickname}
+                  <CommentDate>{formatUpdatedAt(comment.updatedAt)}</CommentDate>
+                </InfoWrapper>
+                {isEditing && editingCommentId === comment.id ? (
+                  <input type="text" value={newCommentContent} onChange={(e) => setNewCommentContent(e.target.value)} onKeyDown={(e) => handleKeyDown(e, comment.id)} />
+                ) : (
+                  <CommentContent>{comment.content}</CommentContent>
+                )}
+                <FunctionWrapper>
+                  <Edit onClick={() => handleEditClick(comment.id, comment.content)}>수정</Edit>
+                  <Delete onClick={() => handleDeleteClick(comment.id)}>삭제</Delete>
+                </FunctionWrapper>
+              </RightWrapper>
+            </CommentItem>
+          ))}
+          <div ref={targetRef}></div>
+        </CommentWrapper>
+      </CommentContainer>
     </Wrapper>
   );
 };
@@ -189,17 +206,20 @@ export default TaskModal;
 
 const Wrapper = styled.div`
   width: 73rem;
+  height: 76.3rem;
+  overflow-y: auto;
+
   padding: 3.2rem 2.8rem 2.8rem 2.8rem;
 
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
 
   border-radius: 8px;
   background: var(--White);
 
   @media (max-width: ${DeviceSize.mobile}) {
     width: 32.7rem;
+    height: 70.8rem;
 
     padding: 2.8rem 2rem 2.8rem 2rem;
 
@@ -209,9 +229,16 @@ const Wrapper = styled.div`
 
 const TitleWrapper = styled.div`
   width: 100%;
+  height: 8.5rem;
 
   display: flex;
   justify-content: space-between;
+
+  /* position: fixed;
+  padding-top: 3.2rem;
+  padding-bottom: 2.4rem; */
+
+  background-color: var(--White);
 `;
 
 const Title = styled.div`
@@ -342,7 +369,7 @@ const Tags = styled.div`
 
     margin-right: 1.6rem;
 
-    align-items: end;
+    align-items: center;
     float: left;
   }
   @media (max-width: ${DeviceSize.mobile}) {
@@ -351,7 +378,13 @@ const Tags = styled.div`
 `;
 
 const DivisionWrapper = styled.div`
-  margin: 0 1rem;
+  margin-left: 2rem;
+  margin-right: 1rem;
+
+  @media (max-width: ${DeviceSize.mobile}) {
+    margin-left: 1.2rem;
+    margin-right: 0.2rem;
+  }
 `;
 
 const Description = styled.div`
@@ -382,6 +415,13 @@ const Image = styled.img`
   }
 `;
 
+const CommentContainer = styled.div`
+  position: sticky;
+  top: 8.5rem;
+  z-index: 10;
+  background: var(--White);
+`;
+
 const CommentWrapper = styled.div`
   margin-top: 1.6rem;
 `;
@@ -399,6 +439,7 @@ const LeftWrapper = styled.div`
     border-radius: 50%;
   }
 `;
+
 const RightWrapper = styled.div``;
 
 const InfoWrapper = styled.div`

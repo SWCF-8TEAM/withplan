@@ -13,19 +13,19 @@ export interface Comment {
 
 export interface GetCommentsData {
   comments: Comment[];
-  curdorId: number | null;
+  cursorId: number | null;
 }
 
 export interface DeleteCommentsProps {
   commentId: number;
-  token: string;
+  token: string | null;
 }
 
 export interface GetCommentsProps {
   cardId: number;
   size?: number;
-  cursorId?: number;
-  token: string;
+  cursorId?: number | null;
+  token: string | null;
 }
 
 export interface PostCommentsProps {
@@ -33,11 +33,11 @@ export interface PostCommentsProps {
   cardId: number;
   columnId: number;
   dashboardId: number;
-  token: string;
+  token: string | null;
 }
 
 export interface PutCommentsProps {
   commentId: number;
   content: string;
-  token: string;
+  token: string | null;
 }

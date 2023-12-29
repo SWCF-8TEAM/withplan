@@ -24,14 +24,14 @@ export interface GetCardListData {
 
 export interface GetCardProps {
   cardId: number;
-  token?: string;
+  token?: string | null;
 }
 
 export interface GetCardListProps {
   size?: number;
   cursorId: number | null;
   columnId: number;
-  token?: string;
+  token?: string | null;
 }
 
 export interface PostCardProps {
@@ -43,15 +43,15 @@ export interface PostCardProps {
   dueDate: string;
   tags: [string];
   imageUrl: string;
-  token: string;
+  token: string | null;
 }
 
 export interface PutCardProps {
   cardId: number;
-  token: string;
+  token: string | null;
 }
 
 export interface DeleteCardProps {
   cardId: number;
-  token?: string;
+  token?: string | null;
 }
