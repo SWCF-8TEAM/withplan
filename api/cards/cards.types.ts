@@ -23,7 +23,7 @@ export interface GetCardListData {
 }
 
 export interface GetCardProps {
-  cardId: string;
+  cardId: number;
   token?: string;
 }
 
@@ -34,12 +34,24 @@ export interface GetCardListProps {
   token?: string;
 }
 
+export interface PostCardProps {
+  assigneeUserId: number;
+  dashboardId: number;
+  columnId: number;
+  title: string;
+  description: string;
+  dueDate: string;
+  tags: [string];
+  imageUrl: string;
+  token: string;
+}
+
 export interface PutCardProps {
-  cardId: string;
+  cardId: number;
   token: string;
 }
 
 export interface DeleteCardProps {
-  cardId: string;
+  cardId: number;
   token?: string;
 }

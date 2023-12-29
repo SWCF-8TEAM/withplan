@@ -1,7 +1,7 @@
 import { Card } from "@/api/cards/cards.types";
 import { getCard } from "@/api/cards/index";
 import { Comment } from "@/api/comments/comments.types";
-import { deleteComments, getComments, putComments } from "@/api/comments/index";
+import { deleteComments, getComments, putComments, postComments } from "@/api/comments/index";
 import Division from "@/assets/icons/category-division.svg";
 import Close from "@/assets/icons/close.svg";
 import Kebab from "@/assets/icons/kebab.svg";
@@ -14,6 +14,10 @@ import { Z_INDEX } from "@/styles/ZindexStyles";
 import { formatUpdatedAt } from "@/utils/FormatDate";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+
+// 임시 토큰
+const TMP_TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjA5LCJ0ZWFtSWQiOiIxLTA4IiwiaWF0IjoxNzAzNzI2OTIzLCJpc3MiOiJzcC10YXNraWZ5In0.YC0RG8_8Xoe8uEjPtqFEdCGilAlOonBG5x47GGJiOLc";
 
 const TaskModal: React.FC = () => {
   const [isKebabModalOpen, setIsKebabModalOpen] = useState(false);
@@ -32,6 +36,18 @@ const TaskModal: React.FC = () => {
     setIsModalOpen(false);
   };
 
+  const submitComment = async (comment: string) => {
+    await postComments({
+      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjA5LCJ0ZWFtSWQiOiIxLTA4IiwiaWF0IjoxNzAzNzI2OTIzLCJpc3MiOiJzcC10YXNraWZ5In0.YC0RG8_8Xoe8uEjPtqFEdCGilAlOonBG5x47GGJiOLc",
+      content: comment,
+      cardId: 159,
+      columnId: 1242,
+      dashboardId: 394,
+    });
+
+    await commentsData;
+  };
+
   const handleEditClick = (commentId: number, currentContent: string) => {
     setIsEditing(true);
     setEditingCommentId(commentId);
@@ -39,7 +55,7 @@ const TaskModal: React.FC = () => {
   };
 
   const handleDeleteClick = async (commentId: number) => {
-    await deleteComments({ commentId, token: "YOUR_TOKEN" });
+    await deleteComments({ commentId, token: TMP_TOKEN });
     await commentsData;
   };
 
@@ -54,7 +70,7 @@ const TaskModal: React.FC = () => {
     if (commentId) {
       await putComments({
         commentId: commentId,
-        token: "YOUR_TOKEN",
+        token: TMP_TOKEN,
         content: newCommentContent,
       });
       setIsEditing(false);
@@ -68,8 +84,7 @@ const TaskModal: React.FC = () => {
     const loadCardData = async () => {
       const data = await getCard({
         cardId: "159",
-        token:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjA5LCJ0ZWFtSWQiOiIxLTA4IiwiaWF0IjoxNzAzNzI2OTIzLCJpc3MiOiJzcC10YXNraWZ5In0.YC0RG8_8Xoe8uEjPtqFEdCGilAlOonBG5x47GGJiOLc",
+        token: TMP_TOKEN,
       });
       if (data) {
         setCardData(data);
@@ -82,8 +97,7 @@ const TaskModal: React.FC = () => {
           cardId: 159,
           size: 10,
           cursorId: undefined,
-          token:
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjA5LCJ0ZWFtSWQiOiIxLTA4IiwiaWF0IjoxNzAzNzI2OTIzLCJpc3MiOiJzcC10YXNraWZ5In0.YC0RG8_8Xoe8uEjPtqFEdCGilAlOonBG5x47GGJiOLc",
+          token: TMP_TOKEN,
         });
 
         if (commentsData) {
@@ -98,8 +112,8 @@ const TaskModal: React.FC = () => {
     loadCommentsData();
   }, []);
 
-  if (!cardData || commentsData.length === 0) {
-    return <div>Loading...</div>; // 데이터 로딩 중 또는 데이터가 없는 경우 처리
+  if (!cardData) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -140,7 +154,7 @@ const TaskModal: React.FC = () => {
       </CategoryWrapper>
       <Description>{cardData.description}</Description>
       <Image src={cardData.imageUrl} alt="Task Image" />
-      <ModalInput label="댓글" $inputType="댓글" />
+      <ModalInput label="댓글" $inputType="댓글" onSubmitComment={submitComment} />
       <CommentWrapper>
         {commentsData.map((comment) => (
           <CommentItem key={comment.id}>

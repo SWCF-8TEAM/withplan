@@ -12,8 +12,8 @@ export interface Comment {
 }
 
 export interface GetCommentsData {
-  curdorId: number | null;
   comments: Comment[];
+  curdorId: number | null;
 }
 
 export interface DeleteCommentsProps {
@@ -25,6 +25,14 @@ export interface GetCommentsProps {
   cardId: number;
   size?: number;
   cursorId?: number;
+  token: string;
+}
+
+export interface PostCommentsProps {
+  content: string;
+  cardId: number;
+  columnId: number;
+  dashboardId: number;
   token: string;
 }
 
