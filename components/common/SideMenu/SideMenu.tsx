@@ -19,6 +19,7 @@ import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useInfiniteScrollNavigator } from "@/hooks/useInfiniteScrollNavigator";
 import { FaArrowUpWideShort } from "react-icons/fa6";
 import { useRouter } from "next/router";
+import { dashboardNamesAtom } from "@/states/atoms";
 
 interface DashboardProps {
   boardId: number;
@@ -35,6 +36,7 @@ const Dashboard = ({ color, title, createdByMe, boardId }: DashboardProps) => {
   const router = useRouter();
   const { boardid } = router.query;
   const isActive = boardId === Number(boardid);
+  const [currentDashboardName, setCurrentDashboardName] = useAtom(dashboardNamesAtom);
 
   return (
     <Container href={`/dashboard/${boardId}`} $isActive={isActive}>

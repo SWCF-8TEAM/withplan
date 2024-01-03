@@ -15,7 +15,7 @@ export const totalColumnsAtom = atom(0);
 
 export const dashboardColorAtom = atom<string>(`${DASHBOARD_COLOR[0]}`);
 
-export const dashBoardNameAtom = atom<string>("");
+export const dashboardNamesAtom = atom<{ [key: number]: string }>({});
 
 export const cardsAtom = atom<{ [columnId: number]: Card[] }>({});
 

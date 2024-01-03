@@ -9,11 +9,11 @@ import { getDashboard } from "@/api/dashboards";
 import { putDashboard } from "@/api/dashboards";
 import { Dashboard } from "@/api/dashboards/dashboards.types";
 import { useAtom } from "jotai";
-import { dashBoardNameAtom } from "@/states/atoms";
+import { dashboardNamesAtom } from "@/states/atoms";
 
 const EditDashboard = () => {
   const [toastVisible, setToastVisible] = useState(false);
-  const [currentDashboardName, setCurrentDashboardName] = useAtom(dashBoardNameAtom);
+  const [currentDashboardName, setCurrentDashboardName] = useAtom(dashboardNamesAtom);
   const [dashboard, setDashboard] = useState<Dashboard>();
   const router = useRouter();
   const { boardid } = router.query;
@@ -24,13 +24,10 @@ const EditDashboard = () => {
 
     const changeDashboardName = await putDashboard({
       dashboardId: Number(boardid),
-      newName: currentDashboardName,
+      title: currentDashboardName,
       token: localStorage.getItem("accessToken"),
     });
-    setDashboard((prevDashboard) => ({
-      ...prevDashboard,
-      title: currentDashboardName,
-    }));
+    setDashboard(changeDashboardName);
   };
 
   const loadDashboardData = async () => {
@@ -40,7 +37,7 @@ const EditDashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, [setDashboard, boardid]);
+  }, [setDashboard, boardid, setCurrentDashboardName]);
 
   return (
     <Wrapper>
