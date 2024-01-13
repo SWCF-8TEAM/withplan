@@ -13,10 +13,6 @@ import { useAtom } from "jotai";
 import { commentScrollAtom } from "@/states/atoms";
 import { getUsers } from "@/api/users";
 
-type CommentEdits = {
-  [commentId: number]: boolean;
-};
-
 const Comments = ({ cardData }: { cardData: Card }) => {
   const [inputValue, setInputValue] = useState("");
   const [commentsData, setCommentsData] = useState<Comment[]>([]);
