@@ -29,7 +29,6 @@ const Comments = ({ cardData }: { cardData: Card }) => {
   const { boardid } = router.query;
   const token = localStorage.getItem("accessToken");
   const [currentUser, setCurrentUser] = useState<string | null>(null); //댓글 렌더링시 로그인 정보와 댓글작성자를 비교
-  const [editedComments, setEditedComments] = useState<CommentEdits>({}); //댓글 수정여부를 판단
 
   const loadCommentsData = async () => {
     setIsLoading(true);
@@ -108,7 +107,6 @@ const Comments = ({ cardData }: { cardData: Card }) => {
     });
     if (res) {
       setCommentsData([...commentsData.map((v) => (v.id === commentId ? res : v))]);
-      setEditedComments((prev) => ({ ...prev, [commentId]: true }));
       setIsEditing(false);
     }
   };
@@ -153,7 +151,7 @@ const Comments = ({ cardData }: { cardData: Card }) => {
                 {comment.author.nickname}
 
                 <CommentDate>{formatUpdatedAt(comment.updatedAt)}</CommentDate>
-                <EditedWrapper> {editedComments[comment.id] && "(수정됨)"}</EditedWrapper>
+                <EditedWrapper> {comment.createdAt !== comment.updatedAt && "(수정됨)"}</EditedWrapper>
               </InfoWrapper>
               {isEditing && editingCommentId === comment.id ? (
                 <form
