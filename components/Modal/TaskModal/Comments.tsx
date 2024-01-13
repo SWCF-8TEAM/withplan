@@ -116,7 +116,6 @@ const Comments = ({ cardData }: { cardData: Card }) => {
       const token = localStorage.getItem("accessToken");
       if (token) {
         const res = await getUsers({ token });
-        console.log("currentUser:", res);
         if (res !== null) {
           setCurrentUser(res);
         }
@@ -148,6 +147,7 @@ const Comments = ({ cardData }: { cardData: Card }) => {
                 {comment.author.nickname}
 
                 <CommentDate>{formatUpdatedAt(comment.updatedAt)}</CommentDate>
+                <EditedWrapper> {comment.createdAt !== comment.updatedAt && "(수정됨)"}</EditedWrapper>
               </InfoWrapper>
               {isEditing && editingCommentId === comment.id ? (
                 <form
@@ -218,6 +218,8 @@ const CommentTextarea = styled.textarea`
   border: 1px solid var(--Grayd9);
   border-radius: 6px;
 
+  transform: skew(-0.05deg);
+
   &:focus {
     border-color: var(--Main);
     outline: none;
@@ -245,6 +247,18 @@ const CommentDate = styled.div`
   display: flex;
   align-items: center;
 
+  font-size: 1.2rem;
+
+  @media (max-width: ${DeviceSize.mobile}) {
+    font-size: 1rem;
+  }
+`;
+
+const EditedWrapper = styled.div`
+  display: flex;
+  align-items: center;
+
+  color: var(--Gray9f);
   font-size: 1.2rem;
 
   @media (max-width: ${DeviceSize.mobile}) {
