@@ -13,6 +13,10 @@ import { useAtom } from "jotai";
 import { commentScrollAtom } from "@/states/atoms";
 import { getUsers } from "@/api/users";
 
+type CommentEdits = {
+  [commentId: number]: boolean;
+};
+
 const Comments = ({ cardData }: { cardData: Card }) => {
   const [inputValue, setInputValue] = useState("");
   const [commentsData, setCommentsData] = useState<Comment[]>([]);
@@ -25,6 +29,7 @@ const Comments = ({ cardData }: { cardData: Card }) => {
   const { boardid } = router.query;
   const token = localStorage.getItem("accessToken");
   const [currentUser, setCurrentUser] = useState<string | null>(null); //댓글 렌더링시 로그인 정보와 댓글작성자를 비교
+  const [editedComments, setEditedComments] = useState<CommentEdits>({}); //댓글 수정여부를 판단
 
   const loadCommentsData = async () => {
     setIsLoading(true);
@@ -103,6 +108,7 @@ const Comments = ({ cardData }: { cardData: Card }) => {
     });
     if (res) {
       setCommentsData([...commentsData.map((v) => (v.id === commentId ? res : v))]);
+      setEditedComments((prev) => ({ ...prev, [commentId]: true }));
       setIsEditing(false);
     }
   };
@@ -116,7 +122,6 @@ const Comments = ({ cardData }: { cardData: Card }) => {
       const token = localStorage.getItem("accessToken");
       if (token) {
         const res = await getUsers({ token });
-        console.log("currentUser:", res);
         if (res !== null) {
           setCurrentUser(res);
         }
@@ -148,6 +153,7 @@ const Comments = ({ cardData }: { cardData: Card }) => {
                 {comment.author.nickname}
 
                 <CommentDate>{formatUpdatedAt(comment.updatedAt)}</CommentDate>
+                <EditedWrapper> {editedComments[comment.id] && "(수정됨)"}</EditedWrapper>
               </InfoWrapper>
               {isEditing && editingCommentId === comment.id ? (
                 <form
@@ -218,6 +224,8 @@ const CommentTextarea = styled.textarea`
   border: 1px solid var(--Grayd9);
   border-radius: 6px;
 
+  transform: skew(-0.05deg);
+
   &:focus {
     border-color: var(--Main);
     outline: none;
@@ -245,6 +253,18 @@ const CommentDate = styled.div`
   display: flex;
   align-items: center;
 
+  font-size: 1.2rem;
+
+  @media (max-width: ${DeviceSize.mobile}) {
+    font-size: 1rem;
+  }
+`;
+
+const EditedWrapper = styled.div`
+  display: flex;
+  align-items: center;
+
+  color: var(--Gray9f);
   font-size: 1.2rem;
 
   @media (max-width: ${DeviceSize.mobile}) {
